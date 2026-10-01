@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://elmerdotdev.github.io/pdf-filler/sitemap.xml

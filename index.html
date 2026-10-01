@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary SEO Meta Tags -->
+  <title>PDF Filler - Add Text & Images to Non-Editable PDFs Online</title>
+  <meta name="title" content="PDF Filler - Add Text & Images to Non-Editable PDFs Online">
+  <meta name="description" content="Free online PDF Filler tool. Easily create custom text fields, place checkmarks, and add images or signatures to flat PDF documents without pre-existing fillable fields.">
+  <meta name="keywords" content="pdf filler, add text to pdf, fill non editable pdf, edit pdf without form fields, pdf signer, place images on pdf, free online pdf tool">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://elmerdotdev.github.io/pdf-filler/">
+
+  <!-- Open Graph / Facebook Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://elmerdotdev.github.io/pdf-filler/">
+  <meta property="og:title" content="PDF Filler - Add Text & Images to Non-Editable PDFs Online">
+  <meta property="og:description" content="Free online PDF Filler tool. Create custom text fields, add checkmarks, and insert images or signatures into any PDF file instantly.">
+  <meta property="og:image" content="assets/favicon.svg">
+
+  <!-- Twitter Meta Tags -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://elmerdotdev.github.io/pdf-filler/">
+  <meta property="twitter:title" content="PDF Filler - Add Text & Images to Non-Editable PDFs Online">
+  <meta property="twitter:description" content="Free online PDF Filler tool. Create custom text fields, add checkmarks, and insert images or signatures into any PDF file instantly.">
+
+  <!-- Favicon & Stylesheet -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Structured Data JSON-LD Schema for Search Engines -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PDF Filler",
+    "url": "https://elmerdotdev.github.io/pdf-filler/",
+    "description": "Free web tool to overlay text boxes, checkmarks, signatures, and images onto non-fillable PDF documents.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- PDF.js library for rendering PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- pdf-lib library for embedding text and downloading updated PDFs -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+
+  <!-- Floating Mobile Burger Button (Top Left) -->
+  <button class="mobile-burger-fab" id="mobile-burger-fab" aria-label="Open sidebar menu">
+    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Hidden inputs -->
+  <input type="file" id="pdf-upload" accept="application/pdf" style="display: none;">
+  <input type="file" id="image-upload-input" accept="image/png, image/jpeg, image/jpg" style="display: none;">
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/favicon.svg" width="28" height="28" alt="PDF Filler Logo">
+      <h1>PDF Filler</h1>
+    </div>
+
+    <div class="seo-description">
+      <strong>Fill Any PDF Document</strong>
+      <p style="margin-top: 4px;">Easily add custom text fields, checkmarks, and images to PDFs that lack pre-made form inputs.</p>
+    </div>
+
+    <div>
+      <div class="sidebar-section-title">Document</div>
+      <div class="document-info">
+        <span id="page-num-display">No PDF loaded</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-title">Widgets</div>
+      <div class="widgets-grid">
+        <!-- Text Box Widget -->
+        <div class="widget-card" id="text-widget" draggable="true" style="opacity: 0.5; cursor: not-allowed;">
+          <div class="widget-icon">T</div>
+          <div class="widget-info">
+            <span class="widget-title">Text Box</span>
+            <span class="widget-desc">Drag or tap to place text</span>
+          </div>
+        </div>
+
+        <!-- Checkmark Widget -->
+        <div class="widget-card" id="checkmark-widget" draggable="true" style="opacity: 0.5; cursor: not-allowed;">
+          <div class="widget-icon">✓</div>
+          <div class="widget-icon-info">
+            <span class="widget-title">Checkmark</span>
+            <span class="widget-desc">Drag or tap to place checkmark</span>
+          </div>
+        </div>
+
+        <!-- Image Widget -->
+        <div class="widget-card" id="image-widget" draggable="true" style="opacity: 0.5; cursor: not-allowed;">
+          <div class="widget-icon">🖼</div>
+          <div class="widget-info">
+            <span class="widget-title">Image / Signature</span>
+            <span class="widget-desc">Drag or tap to upload image</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-title">Placed Elements</div>
+      <div class="placed-list" id="placed-list">
+        <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">No elements placed yet</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Document Viewer -->
+  <main>
+    <div id="viewer-container">
+      <!-- Notification banner when tap-to-place active on mobile -->
+      <div class="tap-placement-banner" id="tap-placement-banner">
+        Tap anywhere on the document to place element
+      </div>
+
+      <div class="drop-zone" id="drop-zone">
+        <svg class="drop-zone-icon" width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <div class="drop-zone-text">Drag & drop your PDF file here</div>
+        <div class="drop-zone-subtext">or click to browse files from your device</div>
+      </div>
+
+      <!-- Hidden SEO Article for Search Engine Crawlers -->
+      <section class="sr-only">
+        <h2>How to Add Text & Images to PDF Documents Without Form Fields</h2>
+        <p>Many official PDF documents, forms, and contracts do not come with interactive form fields enabled. PDF Filler allows you to upload any static PDF file and overlay custom text boxes, checkmarks, signatures, and images anywhere on the document. Simply drag and drop widgets onto any page, adjust font sizes, styles, and colors, and download your updated PDF file for free.</p>
+      </section>
+    </div>
+
+    <!-- Floating Action Buttons (FABs) -->
+    <div class="fab-container">
+      <button class="fab fab-danger" id="start-over-fab" data-tooltip="Start Over" aria-label="Start Over" disabled>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+      </button>
+
+      <button class="fab" id="undo-fab" data-tooltip="Undo" aria-label="Undo" disabled>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+        </svg>
+      </button>
+
+      <button class="fab" id="redo-fab" data-tooltip="Redo" aria-label="Redo" disabled>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"></path>
+        </svg>
+      </button>
+
+      <button class="fab fab-primary" id="download-fab" data-tooltip="Download PDF" aria-label="Download PDF" disabled>
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
