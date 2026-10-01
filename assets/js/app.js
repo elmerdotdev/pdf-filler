@@ -361,7 +361,7 @@ function addTextAnnotation(pageNum, x, y) {
     fontFamily: currentSettings.fontFamily,
     color: currentSettings.color
   };
-  addAnnotationToPage(pageNum, newAnn, true);
+  addAnnotationToPage(pageNum, newAnn);
 }
 
 function addCheckmarkAnnotation(pageNum, x, y) {
@@ -375,10 +375,10 @@ function addCheckmarkAnnotation(pageNum, x, y) {
     fontFamily: currentSettings.fontFamily,
     color: currentSettings.color
   };
-  addAnnotationToPage(pageNum, newAnn, false);
+  addAnnotationToPage(pageNum, newAnn);
 }
 
-function addAnnotationToPage(pageNum, ann, autoFocus = false) {
+function addAnnotationToPage(pageNum, ann) {
   if (!annotations[pageNum]) {
     annotations[pageNum] = [];
   }
@@ -387,14 +387,14 @@ function addAnnotationToPage(pageNum, ann, autoFocus = false) {
   const pageWrapper = document.querySelector(`.page-wrapper[data-page-num="${pageNum}"]`);
   if (pageWrapper) {
     const annotationLayer = pageWrapper.querySelector('.annotation-layer');
-    renderAnnotationElement(ann, annotationLayer, pageNum, autoFocus);
+    renderAnnotationElement(ann, annotationLayer, pageNum);
   }
 
   saveStateToHistory();
   updatePlacedWidgetsList();
 }
 
-function renderAnnotationElement(ann, container, pageNum, autoFocus = false) {
+function renderAnnotationElement(ann, container, pageNum) {
   const el = document.createElement('div');
   el.className = 'draggable-annotation';
   el.id = ann.id;
@@ -415,7 +415,7 @@ function renderAnnotationElement(ann, container, pageNum, autoFocus = false) {
   el.appendChild(deleteBtn);
 
   if (ann.type === 'text') {
-    renderTextContent(el, ann, autoFocus);
+    renderTextContent(el, ann);
   } else if (ann.type === 'image') {
     renderImageContent(el, ann);
   }
@@ -426,7 +426,7 @@ function renderAnnotationElement(ann, container, pageNum, autoFocus = false) {
   selectElement(el, ann);
 }
 
-function renderTextContent(el, ann, autoFocus = false) {
+function renderTextContent(el, ann) {
   const textSpan = document.createElement('span');
   textSpan.className = 'text-content-span';
   textSpan.setAttribute('data-placeholder', 'Type text here...');
@@ -518,12 +518,6 @@ function renderTextContent(el, ann, autoFocus = false) {
     saveStateToHistory();
     updatePlacedWidgetsList();
   });
-
-  if (autoFocus) {
-    setTimeout(() => {
-      enableEditing();
-    }, 100);
-  }
 }
 
 function renderImageContent(el, ann) {
@@ -533,7 +527,7 @@ function renderImageContent(el, ann) {
 
   const img = document.createElement('img');
   img.src = ann.dataUrl;
-  img.ondragstart = () => false; // Prevent native browser drag ghosting for <img> tag
+  img.ondragstart = () => false;
   el.appendChild(img);
 
   const resizeHandle = document.createElement('div');
@@ -639,7 +633,6 @@ function makeDraggable(el, ann, pageNum) {
     const textSpan = el.querySelector('.text-content-span');
     if ((textSpan && textSpan.contentEditable === 'true') || e.target.classList.contains('resize-handle') || e.target.closest('.floating-toolbar')) return;
 
-    // Prevent default touch scrolling / image native dragging
     if (e.type === 'touchstart') {
       e.preventDefault();
     }
